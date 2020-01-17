@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   
   
+  <meta name="description" content="最近刷leetcode遇到个移除切片中某个元素的需求，第一反应是遍历切片然后append下去。但这样需要另外等同大小的空间。能在原切片上操作肯定是最好的。
+1234567891011121314func removeElem(src []int, target int) []int &amp;#123;  " />
+  
 
   
   
@@ -11,14 +14,19 @@
   
   
   
-  <title>williamG</title>
+  <title>Golang移除slice中的某个元素 | williamG</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="williamG">
-<meta property="og:url" content="http://yoursite.com/index.html">
+  <meta name="description" content="最近刷leetcode遇到个移除切片中某个元素的需求，第一反应是遍历切片然后append下去。但这样需要另外等同大小的空间。能在原切片上操作肯定是最好的。 1234567891011121314func removeElem(src []int, target int) []int &amp;#123;    targetidx :&#x3D; -1    for i :&#x3D; range src &amp;#123;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Golang移除slice中的某个元素">
+<meta property="og:url" content="http://yoursite.com/2020/01/17/removeFromSlice/index.html">
 <meta property="og:site_name" content="williamG">
+<meta property="og:description" content="最近刷leetcode遇到个移除切片中某个元素的需求，第一反应是遍历切片然后append下去。但这样需要另外等同大小的空间。能在原切片上操作肯定是最好的。 1234567891011121314func removeElem(src []int, target int) []int &amp;#123;    targetidx :&#x3D; -1    for i :&#x3D; range src &amp;#123;">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-01-17T05:34:15.000Z">
+<meta property="article:modified_time" content="2020-01-17T10:38:19.603Z">
 <meta property="article:author" content="John Doe">
+<meta property="article:tag" content="golang">
 <meta name="twitter:card" content="summary">
   
   
@@ -62,17 +70,15 @@
 </header>
 
       <div id="main" class="wrapper">
-        <div id="primary" class="site-content"><div id="content" role="main">
-  
-    <article id="post-removeFromSlice" class="post-removeFromSlice post type-post status-publish format-standard hentry">
+        <div id="primary" class="site-content"><div id="content" role="main"><article id="post-removeFromSlice" class="post-removeFromSlice post type-post status-publish format-standard hentry">
     <!---->
 
       <header class="entry-header">
         
         
   
-    <h1 class="entry-title">
-      <a class="article-title" href="/2020/01/17/removeFromSlice/">Golang移除slice中的某个元素</a>
+    <h1 class="entry-title article-title">
+      Golang移除slice中的某个元素
     </h1>
   
 
@@ -113,67 +119,20 @@
 </article>
 
 
-
-
-
-
-  
-    <article id="post-hello-world" class="post-hello-world post type-post status-publish format-standard hentry">
-    <!---->
-
-      <header class="entry-header">
-        
-        
-  
-    <h1 class="entry-title">
-      <a class="article-title" href="/2020/01/16/hello-world/">Hello World</a>
-    </h1>
-  
-
-        
-        <div class="comments-link">
-            
-            <a href="javascript:void(0);" data-url="http://yoursite.com/2020/01/16/hello-world/" data-id="ck5i1fisi0000ukl084u6hx0g" class="leave-reply bdsharebuttonbox" data-cmd="more">Share</a>
-        </div><!-- .comments-link -->
-      </header><!-- .entry-header -->
-
-    <div class="entry-content">
-      
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-      
-    </div><!-- .entry-content -->
-
-    <footer class="entry-meta">
-    <a href="/2020/01/16/hello-world/">
-    <time datetime="2020-01-16T08:18:46.643Z" class="entry-date">
-        2020-01-16
-    </time>
-</a>
+    
+<nav class="nav-single">
+    <h3 class="assistive-text">文章导航</h3>
     
     
-    </footer>
-</article>
+        <span class="nav-next"><a href="/2020/01/16/hello-world/" rel="next">Hello World <span class="meta-nav">→</span></a></span>
+    
+</nav><!-- .nav-single -->
 
 
 
 
 
 
-  
-  
 
 </div></div>
         <div id="secondary" class="widget-area" role="complementary">
