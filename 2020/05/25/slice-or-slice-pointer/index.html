@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <meta name="description" content="论坛上经常看到有人提出切片传递用[]int好还是*[]int好的疑问，正好自己也对这个比较好奇，就借此研究下运行时具体有什么区别。
+首先要了解一个常识：切片在runtime时是由一个包含地址、len、cap的结构体表示。
+123456//definition in runtime/slice.gotype slice struct &amp;#123;	array unsafe.Pointer	len   int	cap   int&amp;#125;
+
+这样按照Golang的调用约定func(s []int)应该会压入三个参数，但func(s *[]int)呢，是否会只压入指向切片结构体的指针，下面来通过编译出的汇编代码来验证。" />
+  
+
+  
+  
+  
+  
+  
+  
+  <title>slice_or_slice_pointer | williamG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="论坛上经常看到有人提出切片传递用[]int好还是*[]int好的疑问，正好自己也对这个比较好奇，就借此研究下运行时具体有什么区别。 首先要了解一个常识：切片在runtime时是由一个包含地址、len、cap的结构体表示。 123456&#x2F;&#x2F;definition in runtime&#x2F;slice.gotype slice struct &amp;#123;	array unsafe.Pointer	len">
+<meta property="og:type" content="article">
+<meta property="og:title" content="slice_or_slice_pointer">
+<meta property="og:url" content="http://yoursite.com/2020/05/25/slice-or-slice-pointer/index.html">
+<meta property="og:site_name" content="williamG">
+<meta property="og:description" content="论坛上经常看到有人提出切片传递用[]int好还是*[]int好的疑问，正好自己也对这个比较好奇，就借此研究下运行时具体有什么区别。 首先要了解一个常识：切片在runtime时是由一个包含地址、len、cap的结构体表示。 123456&#x2F;&#x2F;definition in runtime&#x2F;slice.gotype slice struct &amp;#123;	array unsafe.Pointer	len">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-05-25T07:58:38.000Z">
+<meta property="article:modified_time" content="2020-05-28T03:39:38.803Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="golang slice assembly stack">
+<meta name="twitter:card" content="summary">
+  
+  
+    <link rel="icon" href="/css/images/favicon.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+
+  
+  <!-- baidu webmaster push -->
+  <script src='//zz.bdstatic.com/linksubmit/push.js'></script>
+<meta name="generator" content="Hexo 4.2.0"></head>
+<body class="home blog custom-background custom-font-enabled single-author">
+  <div id="page" class="hfeed site">
+      <header id="masthead" class="site-header" role="banner">
+    <hgroup>
+      <h1 class="site-title">
+        <a href="/" title="williamG" rel="home">williamG</a>
+      </h1>
+      
+        <h2 class="site-description hitokoto"></h2>
+        <script type="text/javascript" src="https://v1.hitokoto.cn/?encode=js"></script>
+      
+    </hgroup>
+
+    <nav id="site-navigation" class="main-navigation" role="navigation">
+            <button class="menu-toggle">菜单</button>
+            <a class="assistive-text" href="/#content" title="跳至内容">跳至内容</a><!--TODO-->
+            <div class="menu-main-container">
+                <ul id="menu-main" class="nav-menu">
+                
+                    <li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="/">Home</a></li>
+                
+                    <li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="/archives">Archives</a></li>
+                
+                </ul>
+            </div>
+    </nav>
+</header>
+
+      <div id="main" class="wrapper">
+        <div id="primary" class="site-content"><div id="content" role="main"><article id="post-slice-or-slice-pointer" class="post-slice-or-slice-pointer post type-post status-publish format-standard hentry">
+    <!---->
+
+      <header class="entry-header">
+        
+        
+  
+    <h1 class="entry-title article-title">
+      slice_or_slice_pointer
+    </h1>
+  
+
+        
+        <div class="comments-link">
+            
+            <a href="javascript:void(0);" data-url="http://yoursite.com/2020/05/25/slice-or-slice-pointer/" data-id="ckaq8r55m0003pcl0cbgh66ls" class="leave-reply bdsharebuttonbox" data-cmd="more"></a>
+        </div><!-- .comments-link -->
+      </header><!-- .entry-header -->
+
+    <div class="entry-content">
+      
+        <p>论坛上经常看到有人提出切片传递用[]int好还是*[]int好的疑问，正好自己也对这个比较好奇，就借此研究下运行时具体有什么区别。</p>
+<p>首先要了解一个常识：切片在runtime时是由一个包含地址、len、cap的结构体表示。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//definition in runtime/slice.go</span></span><br><span class="line"><span class="keyword">type</span> slice <span class="keyword">struct</span> &#123;</span><br><span class="line">	array unsafe.Pointer</span><br><span class="line">	<span class="built_in">len</span>   <span class="keyword">int</span></span><br><span class="line">	<span class="built_in">cap</span>   <span class="keyword">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样按照Golang的调用约定func(s []int)应该会压入三个参数，但func(s *[]int)呢，是否会只压入指向切片结构体的指针，下面来通过编译出的汇编代码来验证。</p>
+<a id="more"></a>
+
+<ol>
+<li>func f(s []int)</li>
+</ol>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">var</span> l <span class="keyword">int</span></span><br><span class="line">        fmt.Scanln(&amp;l)</span><br><span class="line">        s := <span class="built_in">make</span>([]<span class="keyword">int</span>, l)</span><br><span class="line">        f(s)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">(slice []<span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">        slice[<span class="number">2</span>] = <span class="number">33</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">11              f(s)</span><br><span class="line">   0x00000000004880d0 &lt;+288&gt;:   48 89 04 24     mov    %rax,(%rsp)</span><br><span class="line">   0x00000000004880d4 &lt;+292&gt;:   48 89 4c 24 08  mov    %rcx,0x8(%rsp)</span><br><span class="line">   0x00000000004880d9 &lt;+297&gt;:   48 89 54 24 10  mov    %rdx,0x10(%rsp)</span><br><span class="line">&#x3D;&gt; 0x00000000004880de &lt;+302&gt;:   e8 1d 00 00 00  callq  0x488100 &lt;main.f&gt;</span><br><span class="line">(gdb) p s.array</span><br><span class="line">$7 &#x3D; (int *) 0xc0000140e0       &#x2F;&#x2F;s的底层地址为0xc0000140e0</span><br><span class="line">(gdb) x &#x2F;2x $rsp</span><br><span class="line">0xc000086eb8:   0x000140e0      0x000000c0      &#x2F;&#x2F;$rsp指向的值为切片底层地址</span><br><span class="line">(gdb) x &#x2F;2x $rsp+0x8</span><br><span class="line">0xc000086ec0:   0x00000003      0x00000000      &#x2F;&#x2F;$rsp+0x8处为切片的len</span><br><span class="line">(gdb) x &#x2F;2x $rsp+0x10</span><br><span class="line">0xc000086ec8:   0x00000003      0x00000000      &#x2F;&#x2F;$rsp+0x10处为切片的cap</span><br></pre></td></tr></table></figure>
+
+<p>上面调用f前做了3次参数准备(golang里参数和返回值由caller维护)，分别在rsp,rsp+0x8,<br>rsp+0x10压入切片的三个要素，<br>因此切片作为参数时的确是传入了内部结构的三个值array，len，cap，并且array在底部。</p>
+<ol start="2">
+<li>func f(s *[]int)</li>
+</ol>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">var</span> l <span class="keyword">int</span></span><br><span class="line">        fmt.Scanln(&amp;l)</span><br><span class="line">        s := <span class="built_in">make</span>([]<span class="keyword">int</span>, l)</span><br><span class="line">        f(&amp;s)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">(slice *[]<span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">        (*slice)[<span class="number">2</span>] = <span class="number">33</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">11              f(&amp;s)</span><br><span class="line">   0x00000000004880d0 &lt;+288&gt;:   48 8d 44 24 68  lea    0x68(%rsp),%rax</span><br><span class="line">   0x00000000004880d5 &lt;+293&gt;:   48 89 04 24     mov    %rax,(%rsp)  #修改rsp的值为切片array地址</span><br><span class="line">&#x3D;&gt; 0x00000000004880d9 &lt;+297&gt;:   e8 22 00 00 00  callq  0x488100 &lt;main.f&gt;</span><br><span class="line">(gdb) p s.array</span><br><span class="line">$1 &#x3D; (int *) 0xc000094030</span><br></pre></td></tr></table></figure>
+<p>为了方便列出了运行时栈上的内存，可以看出调用f(s *[]int)时仅仅传入了一个地址，<br>这个地址指向了切片的array部分(类似于C里结构体指针指向首元素)，这样f函数里可以通过三道核心指令就可以修改切片元素。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mov    0x20(%rsp),%rdx          #把rsp+0x20处的值传入rdx，即0xc000086f20</span><br><span class="line">mov    (%rdx),%rdx              #取出rdx中指向的地址给rdx，即s.array的值0xc000094030</span><br><span class="line">movq   $0x21,0x10(%rdx)         #把33赋值给s.array+0x10处的内存</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>address</th>
+<th align="center">value</th>
+<th align="right">comment</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0xc000086f30</td>
+<td align="center">0x00000006</td>
+<td align="right">rsp+78，len</td>
+</tr>
+<tr>
+<td>0xc000086f28</td>
+<td align="center">0x00000006</td>
+<td align="right">rsp+70，cap</td>
+</tr>
+<tr>
+<td>0xc000086f20</td>
+<td align="center">0xc000094030</td>
+<td align="right">rsp+0x68,array</td>
+</tr>
+<tr>
+<td>…</td>
+<td align="center">…</td>
+<td align="right">…</td>
+</tr>
+<tr>
+<td>0xc000086eb8</td>
+<td align="center">0xc000086f20</td>
+<td align="right">rsp</td>
+</tr>
+</tbody></table>
+
+      
+    </div><!-- .entry-content -->
+
+    <footer class="entry-meta">
+    <a href="/2020/05/25/slice-or-slice-pointer/">
+    <time datetime="2020-05-25T07:58:38.000Z" class="entry-date">
+        2020-05-25
+    </time>
+</a>
+    
+    
+  <span class="article-delim">&#8226;</span>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang-slice-assembly-stack/" rel="tag">golang slice assembly stack</a></li></ul>
+
+    </footer>
+</article>
+
+
+    
+<nav class="nav-single">
+    <h3 class="assistive-text">文章导航</h3>
+    
+    
+        <span class="nav-next"><a href="/2020/05/08/string-byte-convert/" rel="next">string_byte_convert <span class="meta-nav">→</span></a></span>
+    
+</nav><!-- .nav-single -->
+
+
+
+
+
+
+
+</div></div>
+        <div id="secondary" class="widget-area" role="complementary">
+  
+    <aside id="search" class="widget widget_search"><form role="search" method="get" accept-charset="utf-8" id="searchform" class="searchform" action="//google.com/search">
+    <div>
+        <input type="text" value="" name="s" id="s" />
+        <input type="submit" id="searchsubmit" value="搜索" />
+    </div>
+</form></aside>
+  
+    
+  
+    
+  
+    
+  <aside class="widget">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget-content">
+      <ul>
+        
+          <li>
+            <a href="/2020/05/25/slice-or-slice-pointer/">slice_or_slice_pointer</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/08/string-byte-convert/">string_byte_convert</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/18/sync-atomic/">sync/atomic</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/17/removeFromSlice/">Golang移除slice中的某个元素</a>
+          </li>
+        
+          <li>
+            <a href="/2020/01/16/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </aside>
+
+  
+    
+  <aside class="widget">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget-content">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/" rel="tag">golang</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang-atomic/" rel="tag">golang atomic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang-slice-assembly-stack/" rel="tag">golang slice assembly stack</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang-string-bytes/" rel="tag">golang string bytes</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </aside>
+
+  
+    
+  <aside class="widget">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget-content tagcloud">
+      <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/golang-atomic/" style="font-size: 10px;">golang atomic</a> <a href="/tags/golang-slice-assembly-stack/" style="font-size: 10px;">golang slice assembly stack</a> <a href="/tags/golang-string-bytes/" style="font-size: 10px;">golang string bytes</a>
+    </div>
+  </aside>
+
+  
+</div>
+      </div>
+      <footer id="colophon" role="contentinfo">
+    <p>&copy; 2020 John Doe
+    All rights reserved.</p>
+    <p>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></p>
+</footer>
+    <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"16"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/js/share.js'];</script>
+
+<script src="/js/jquery-3.3.1.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+<script src="/js/navigation.js"></script>
+
+<div id="bg"></div>
+
+  </div>
+</body>
+</html>
