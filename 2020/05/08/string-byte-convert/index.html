@@ -25,9 +25,11 @@ fiber的源码utils.go里有这样两个函数:
 <meta property="og:description" content="众所周知golang里切片由一个array&#x2F;len&#x2F;cap组成的结构体表示，而字符串是由len+addr表示。今天看fiber源码里有两个相互转化的实现，借此探究下区别和具体运行时是如何处理的。 fiber的源码utils.go里有这样两个函数: 123456var getBytes &#x3D; func(s string) (b []byte) &amp;#123;	return *(*[]byte)(unsa">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-05-08T07:44:29.000Z">
-<meta property="article:modified_time" content="2020-05-28T03:44:59.357Z">
+<meta property="article:modified_time" content="2020-05-28T04:01:03.813Z">
 <meta property="article:author" content="John Doe">
-<meta property="article:tag" content="golang string bytes">
+<meta property="article:tag" content="golang">
+<meta property="article:tag" content="string">
+<meta property="article:tag" content="bytes">
 <meta name="twitter:card" content="summary">
   
   
@@ -86,7 +88,7 @@ fiber的源码utils.go里有这样两个函数:
         
         <div class="comments-link">
             
-            <a href="javascript:void(0);" data-url="http://yoursite.com/2020/05/08/string-byte-convert/" data-id="ckaq8zrfl000elcl0adwzdbfn" class="leave-reply bdsharebuttonbox" data-cmd="more"></a>
+            <a href="javascript:void(0);" data-url="http://yoursite.com/2020/05/08/string-byte-convert/" data-id="ckaq93jh8000e00l0gg5kgvon" class="leave-reply bdsharebuttonbox" data-cmd="more"></a>
         </div><!-- .comments-link -->
       </header><!-- .entry-header -->
 
@@ -131,7 +133,7 @@ fiber的源码utils.go里有这样两个函数:
     
     
   <span class="article-delim">&#8226;</span>
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang-string-bytes/" rel="tag">golang string bytes</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/bytes/" rel="tag">bytes</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/" rel="tag">golang</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/string/" rel="tag">string</a></li></ul>
 
     </footer>
 </article>
@@ -203,7 +205,7 @@ fiber的源码utils.go里有这样两个函数:
   <aside class="widget">
     <h3 class="widget-title">Tags</h3>
     <div class="widget-content">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/assembly/" rel="tag">assembly</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/" rel="tag">golang</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang-atomic/" rel="tag">golang atomic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang-string-bytes/" rel="tag">golang string bytes</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/slice/" rel="tag">slice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/stack/" rel="tag">stack</a><span class="tag-list-count">1</span></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/assembly/" rel="tag">assembly</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/atomic/" rel="tag">atomic</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bytes/" rel="tag">bytes</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/" rel="tag">golang</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/slice/" rel="tag">slice</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/stack/" rel="tag">stack</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/string/" rel="tag">string</a><span class="tag-list-count">1</span></li></ul>
     </div>
   </aside>
 
@@ -212,7 +214,7 @@ fiber的源码utils.go里有这样两个函数:
   <aside class="widget">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget-content tagcloud">
-      <a href="/tags/assembly/" style="font-size: 10px;">assembly</a> <a href="/tags/golang/" style="font-size: 20px;">golang</a> <a href="/tags/golang-atomic/" style="font-size: 10px;">golang atomic</a> <a href="/tags/golang-string-bytes/" style="font-size: 10px;">golang string bytes</a> <a href="/tags/slice/" style="font-size: 10px;">slice</a> <a href="/tags/stack/" style="font-size: 10px;">stack</a>
+      <a href="/tags/assembly/" style="font-size: 10px;">assembly</a> <a href="/tags/atomic/" style="font-size: 10px;">atomic</a> <a href="/tags/bytes/" style="font-size: 10px;">bytes</a> <a href="/tags/golang/" style="font-size: 20px;">golang</a> <a href="/tags/slice/" style="font-size: 10px;">slice</a> <a href="/tags/stack/" style="font-size: 10px;">stack</a> <a href="/tags/string/" style="font-size: 10px;">string</a>
     </div>
   </aside>
 
