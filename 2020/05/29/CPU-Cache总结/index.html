@@ -5,7 +5,38 @@
   
   
   <meta name="description" content="1. CPU缓存简介CPU缓存是介于内存与CPU之间的存储介质，速度上低于寄存器而高于RAM。
-1234567891011121314151617|---------------------------------------------------------------||           " />
+1234567891011121314151617|---------------------------------------------------------------||                                                               ||                L3 Cache(shared by all cores)                  ||                                                               ||----------------------------------------------------------------|               |               |               |               ||   L2 Cache    |   L2 Cache    |   L2 Cache    |   L2 Cache    ||               |               |               |               ||----------------------------------------------------------------| L1 instruction| L1 instruction| L1 instruction| L1 instruction||----------------------------------------------------------------    | L1 Data       | L1 Data       | L1 Data       | L1 Data       ||----------------------------------------------------------------|               |               |               |               ||     Core1     |     Core2     |     Core3     |     Core4     ||               |               |               |               ||---------------------------------------------------------------|
+
+如上图所示,三级缓存里，L1通常包括指令缓存和数据缓存，L2、L3不分数据与指令缓存，并且L3为所有核心共享。以下是三者速度的参照：
+
+
+
+Cache
+Lentency
+CPU cycles
+Size
+
+
+
+L1
+~1.2ns
+4 cycles
+32KB~512KB
+
+
+L2
+~3ns
+10 cycles
+128KB~24MB
+
+
+L3
+~12ns
+40 cycles
+2MB~32MB
+
+
+引入缓存一般要考虑两种问题：    - 缓存命中率    - 缓存一致性" />
   
 
   
@@ -24,7 +55,7 @@
 <meta property="og:description" content="1. CPU缓存简介CPU缓存是介于内存与CPU之间的存储介质，速度上低于寄存器而高于RAM。 1234567891011121314151617|---------------------------------------------------------------||">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-05-28T16:00:08.000Z">
-<meta property="article:modified_time" content="2020-06-25T17:58:05.057Z">
+<meta property="article:modified_time" content="2020-06-25T18:09:04.969Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="Computer Science">
 <meta name="twitter:card" content="summary">
@@ -85,7 +116,7 @@
         
         <div class="comments-link">
             
-            <a href="javascript:void(0);" data-url="http://yoursite.com/2020/05/29/CPU-Cache%E6%80%BB%E7%BB%93/" data-id="ckbv3ayzp000hhgl0bzji75xs" class="leave-reply bdsharebuttonbox" data-cmd="more"></a>
+            <a href="javascript:void(0);" data-url="http://yoursite.com/2020/05/29/CPU-Cache%E6%80%BB%E7%BB%93/" data-id="ckbv3q0tm000ajgl0hp8tee4q" class="leave-reply bdsharebuttonbox" data-cmd="more"></a>
         </div><!-- .comments-link -->
       </header><!-- .entry-header -->
 
@@ -124,20 +155,27 @@
 </tr>
 </tbody></table>
 <p>引入缓存一般要考虑两种问题：<br>    - 缓存命中率<br>    - 缓存一致性</p>
-<h1 id="2-缓存命中率"><a href="#2-缓存命中率" class="headerlink" title="2. 缓存命中率"></a>2. 缓存命中率</h1><p>缓存行(Cache Line): CPU Cache并不会一个字节一个字节缓存，而会以一块一块的方式加载，块的单位即为cache line size，<br>目前主流CPU的cache line大小为64字节。把内存数据缓存到cache里(即CPU Associativity)需要一种特定的关联算法，能够<br>由内存地址快速定位到cache的某个位置。<br>    - 不做任何映射规则的话，由于内存数据可能出现在cache的任意位置，所以每次都要有O(cache大小)的遍历，效率很低。<br>    - 按照一定的哈希规则,比如求模运算，比如L1有512个cache line，则对内存地址取模(addr mod 512)就可以定位到具体的<br>        cache line，但如果内存访问不均匀的话会有冷热cache访问不均匀的问题。<br>    - 针对上述情况，折中的方案就是扩大取模的模数，也就是把连续多个cache line绑成一组，即N-Way关联。定位时先找到<br>        相关的组，然后在组内找到相关的缓存行，也就是Set-Associativity。<br>        以2-Way组关联为例，地址0 -&gt; index0,way0/index0,way1，地址1 -&gt; index1,way0/index1,way1。每个内存地址<br>        会在cache里缓存在两个地方。</p>
-<pre><code>以Intel的32KB的L1来说，8-way组关联，64Byte的cache line，
-    + 32KB的L1可以划分为32KB/64B = 512个cache line。
-    + 因为是8-way，所以每路有512/8 = 64个cache line。
-    + cache line大小是64Byte，则每路大小为64*64Byte = 4096Byte。
+<a id="more"></a>
 
-索引内存地址的时候有以下3个概念，以36位地址为例：
-    + Tag: 每条cache line都会有一个独立分配的24bits来存tag，也就是内存的高位24bits。
-    + Index/Set：后续的6bits来表示在某一路里的cache line索引，2^6=64正好可以索引单路里的64条cache line。
-    + Offset：再后面的6bits用来表示在cache line里的偏移量。
+<h1 id="2-缓存命中率"><a href="#2-缓存命中率" class="headerlink" title="2. 缓存命中率"></a>2. 缓存命中率</h1><p>缓存行(Cache Line): CPU Cache并不会一个字节一个字节缓存，而会以一块一块的方式加载，<br>块的单位即为cache line size，目前主流CPU的cache line大小为64字节。把内存数据缓存到<br>cache里(即CPU Associativity)需要一种特定的关联算法，能够由内存地址快速定位到cache的某个位置。</p>
+<pre><code>- 不做任何映射规则的话，由于内存数据可能出现在cache的任意位置，所以每次都要有O(cache大小)的遍历，效率很低。
+- 按照一定的哈希规则,比如求模运算，比如L1有512个cache line，则对内存地址取模(addr mod 512)就可以定位到具体的
+    cache line，但如果内存访问不均匀的话会有冷热cache访问不均匀的问题。
+- 针对上述情况，折中的方案就是扩大取模的模数，也就是把连续多个cache line绑成一组，即N-Way关联。定位时先找到
+    相关的组，然后在组内找到相关的缓存行，也就是Set-Associativity。
+    以2-Way组关联为例，地址0 -&gt; index0,way0/index0,way1，地址1 -&gt; index1,way0/index1,way1。每个内存地址
+    会在cache里缓存在两个地方。</code></pre><p>以Intel的32KB的L1来说，8-way组关联，64Byte的cache line，</p>
+<pre><code>+ 32KB的L1可以划分为32KB/64B = 512个cache line。
++ 因为是8-way，所以每路有512/8 = 64个cache line。
++ cache line大小是64Byte，则每路大小为64*64Byte = 4096Byte。</code></pre><p>索引内存地址的时候有以下3个概念，以36位地址为例：</p>
+<pre><code>+ Tag: 每条cache line都会有一个独立分配的24bits来存tag，也就是内存的高位24bits。
++ Index/Set：后续的6bits来表示在某一路里的cache line索引，2^6=64正好可以索引单路里的64条cache line。
++ Offset：再后面的6bits用来表示在cache line里的偏移量。
 
 因此，取内存时先拿中间的6bits获得对应的index/set,然后对这一组cache,一共8way即8个cache line进行遍历，匹配
-前面的24bits的tag，命中了即为cache hit，未命中则继续向后面的L2、L3索引，淘汰算法采用的是LRU算法。</code></pre><h1 id="3-缓存一致性"><a href="#3-缓存一致性" class="headerlink" title="3. 缓存一致性"></a>3. 缓存一致性</h1><p>缓存写一般有两种方式：<br>    - Write Back： 写在cache上，之后一定条件下flush到内存<br>    - Write Through：写的时候同时写到cache+内存</p>
-<p>通常采用Write Back方式，因为直接写内存效率很低，只在读的时候利用到cache。<br>采用第一种的话就要考虑多核cache的同步问题，这种情况下的一致性与宏观角度下paxos/raft有所不同，因为cpu内部的通信稳定性<br>可以看做为100%，不用考虑宏观下的网络波动等问题，只需要要维护好数据的状态即可。</p>
+前面的24bits的tag，命中了即为cache hit，未命中则继续向后面的L2、L3索引，淘汰算法采用的是LRU算法。</code></pre><h1 id="3-缓存一致性"><a href="#3-缓存一致性" class="headerlink" title="3. 缓存一致性"></a>3. 缓存一致性</h1><p>缓存写一般有两种方式：</p>
+<pre><code>- Write Back： 写在cache上，之后一定条件下flush到内存
+- Write Through：写的时候同时写到cache+内存</code></pre><p>通常采用Write Back方式，因为直接写内存效率很低，只在读的时候利用到cache。<br>采用第一种的话就要考虑多核cache的同步问题，这种情况下的一致性与宏观角度下paxos/raft有所不同，因为cpu内部的通信稳定性<br>可以看做为100%，不用考虑宏观下的网络波动等问题，只需要要维护好数据的状态即可。</p>
 <p>MESI协议： M(modified，已修改)，E(exclusive,被独占)，S(shared,被共享)，I(invalid,已无效)<br>上面是描述cache里数据的4种状态，MESI协议在某核心的cache更新数据时，其他核心的cache变为invalid，而需要从内存取新的数据，<br>这样会造成一定的性能降低，因此可以寻找一种从隔壁核心的cache同步数据的协议，即MOESI协议，加了个Owner的概念，标记更新数据<br>的源，另外有个对应的MESIF协议，F为Forward，同样可以把更新的数据转发到别的核心，区别在于Owner状态下的数据是dirty的，未被<br>写回内存，而Forward状态下的数据是clean的，被丢弃也不影响一致性。<br>注：AMD用MOESI，Intel用MESIF协议。</p>
 <h1 id="示例1：for-loop内对于不同步长下的运行效率"><a href="#示例1：for-loop内对于不同步长下的运行效率" class="headerlink" title="示例1：for-loop内对于不同步长下的运行效率"></a>示例1：for-loop内对于不同步长下的运行效率</h1><hr>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">        stride, err := strconv.Atoi(os.Args[<span class="number">1</span>])</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">                fmt.Println(<span class="string">"invalid stride, stride=%v, error=%v\n"</span>, stride, err)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">const</span> LEN = <span class="number">64</span> *<span class="number">1024</span> * <span class="number">1024</span>;</span><br><span class="line">        arr := <span class="built_in">make</span>([]<span class="keyword">int</span>, LEN)</span><br><span class="line"></span><br><span class="line">        t1 := time.Now()</span><br><span class="line">        <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; LEN; i+=stride &#123;</span><br><span class="line">                arr[i] = i</span><br><span class="line">        &#125;</span><br><span class="line">        fmt.Printf(<span class="string">"stride&lt;%v&gt; cost:%v\n"</span>, stride, time.Now().Sub(t1))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
