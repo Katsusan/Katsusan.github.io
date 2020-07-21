@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   
   
-  <meta name="description" content="2020/6/16，go团队发布了新的go泛型草案，用类型参数type parameters来限制或者说声明
+  <meta name="description" content="2020/6/16，go团队发布了新的go泛型草案，用类型参数type parameters来限制或者说声明对函数的传入参数的约束。
 原文：https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md历史草案：https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-contracts.mdplayground：https://go2goplay.golang.org/Go泛型讨论概要：https://docs.google.com/document/d/1vrAy9gMpMoS3uaVphB32uVXX4pi-HnNjkMEgyAHX4N4/view#" />
   
 
@@ -16,15 +16,15 @@
   
   <title>go2_type_parameters | williamG</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="2020&#x2F;6&#x2F;16，go团队发布了新的go泛型草案，用类型参数type parameters来限制或者说声明 原文：https:&#x2F;&#x2F;go.googlesource.com&#x2F;proposal&#x2F;+&#x2F;refs&#x2F;heads&#x2F;master&#x2F;design&#x2F;go2draft-type-parameters.md历史草案：https:&#x2F;&#x2F;go.googlesource.com&#x2F;proposal&#x2F;+&#x2F;refs&#x2F;he">
+  <meta name="description" content="2020&#x2F;6&#x2F;16，go团队发布了新的go泛型草案，用类型参数type parameters来限制或者说声明对函数的传入参数的约束。 原文：https:&#x2F;&#x2F;go.googlesource.com&#x2F;proposal&#x2F;+&#x2F;refs&#x2F;heads&#x2F;master&#x2F;design&#x2F;go2draft-type-parameters.md历史草案：https:&#x2F;&#x2F;go.googlesource.com&#x2F;propos">
 <meta property="og:type" content="article">
 <meta property="og:title" content="go2_type_parameters">
 <meta property="og:url" content="http://yoursite.com/2020/07/13/go2-type-parameters/index.html">
 <meta property="og:site_name" content="williamG">
-<meta property="og:description" content="2020&#x2F;6&#x2F;16，go团队发布了新的go泛型草案，用类型参数type parameters来限制或者说声明 原文：https:&#x2F;&#x2F;go.googlesource.com&#x2F;proposal&#x2F;+&#x2F;refs&#x2F;heads&#x2F;master&#x2F;design&#x2F;go2draft-type-parameters.md历史草案：https:&#x2F;&#x2F;go.googlesource.com&#x2F;proposal&#x2F;+&#x2F;refs&#x2F;he">
+<meta property="og:description" content="2020&#x2F;6&#x2F;16，go团队发布了新的go泛型草案，用类型参数type parameters来限制或者说声明对函数的传入参数的约束。 原文：https:&#x2F;&#x2F;go.googlesource.com&#x2F;proposal&#x2F;+&#x2F;refs&#x2F;heads&#x2F;master&#x2F;design&#x2F;go2draft-type-parameters.md历史草案：https:&#x2F;&#x2F;go.googlesource.com&#x2F;propos">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-07-13T10:40:43.000Z">
-<meta property="article:modified_time" content="2020-07-21T18:58:04.092Z">
+<meta property="article:modified_time" content="2020-07-21T19:01:29.801Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="golang">
 <meta property="article:tag" content="generics">
@@ -86,13 +86,13 @@
         
         <div class="comments-link">
             
-            <a href="javascript:void(0);" data-url="http://yoursite.com/2020/07/13/go2-type-parameters/" data-id="ckcwawta4000rn0l0b2wa4k1w" class="leave-reply bdsharebuttonbox" data-cmd="more"></a>
+            <a href="javascript:void(0);" data-url="http://yoursite.com/2020/07/13/go2-type-parameters/" data-id="ckcwb0tmm000qpcl08k3pd1fm" class="leave-reply bdsharebuttonbox" data-cmd="more"></a>
         </div><!-- .comments-link -->
       </header><!-- .entry-header -->
 
     <div class="entry-content">
       
-        <p>2020/6/16，go团队发布了新的go泛型草案，用类型参数type parameters来限制或者说声明</p>
+        <p>2020/6/16，go团队发布了新的go泛型草案，用类型参数type parameters来限制或者说声明<br>对函数的传入参数的约束。</p>
 <p>原文：<a href="https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md" target="_blank" rel="noopener">https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-type-parameters.md</a><br>历史草案：<a href="https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-contracts.md" target="_blank" rel="noopener">https://go.googlesource.com/proposal/+/refs/heads/master/design/go2draft-contracts.md</a><br>playground：<a href="https://go2goplay.golang.org/" target="_blank" rel="noopener">https://go2goplay.golang.org/</a><br>Go泛型讨论概要：<a href="https://docs.google.com/document/d/1vrAy9gMpMoS3uaVphB32uVXX4pi-HnNjkMEgyAHX4N4/view#" target="_blank" rel="noopener">https://docs.google.com/document/d/1vrAy9gMpMoS3uaVphB32uVXX4pi-HnNjkMEgyAHX4N4/view#</a></p>
 <a id="more"></a>
 
